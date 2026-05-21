@@ -1,0 +1,92 @@
+#!/bin/bash
+
+#Bash Script Disk Checker -
+#Write a bash script that checks for disk space on a local system
+#If space utilized < 70% do nothing
+#If space utilized >= 70% <= 85%, write a warning message in syslog or messages and send an email to <your_email>@amazon.com
+#If space utilized > 85%, write an error message in syslog or messages and send email to <your_email>@amazon.com
+#Make the tool run as a cronjob every hour of every day!
+
+#Note: If notice has been sent within past hour, do not notify again.
+#Bonus: Specify argument for disk/mount point
+
+#Work
+#Filter df output to only show real disk filesystems (exclude virtual/map entries):
+#df -h | grep '^/dev/'
+#This matches lines starting with /dev/, which are local/physical filesystems — skipping devfs, map auto_home, map -fstab, and other virtual entries.
+# tr -d '%' deletes all % characters from the output.
+#tr stands for translate (or transliterate). It replaces, deletes, or squeezes characters from stdin. It works character-by-character, not on words or patterns.
+#  - Translate — replace characters: tr 'a' 'b' (replace every a with b)                                                                                       
+#  - Delete — remove characters: tr -d '%' (delete every %)                                                                                                    
+#  - Squeeze — collapse repeats: tr -s ' ' (turn multiple spaces into one)
+
+#You could also do it directly in awk:  awk '{gsub(/%/,""); print $5}'
+
+
+#syslog — use logger:
+  #logger -p user.warning "Disk usage at ${disk}% on $(hostname)"                                                                                              
+  #logger -p user.err "Disk usage CRITICAL at ${disk}% on $(hostname)"                                                                                                                                                                                                                                                    
+  #-p sets the priority: user.warning for warnings, user.err for errors. On macOS, messages go to /var/log/system.log (or check with log show --last 5m).
+  #Email — use mail (or mailx):                                               
+  #echo "Disk usage at ${disk}% on $(hostname)" | mail -s "Disk Warning" your_email@amazon.com 
+
+disk_space=$(df -h | grep '^/dev/' | awk '{print $5}'| tr -d '%')
+#echo "$disk_space"
+
+echo "$disk_space" | while read disk;
+     do
+
+        if [ "$disk" -lt 70 ];
+        then
+        echo "Do Nothing"
+
+        elif [ "$disk" -ge 70 ] && [ "$disk" -le 85 ];
+        then
+        echo "Write Message in Syslog and email <your_email>@amazon.com"
+
+        elif [ "$disk" -gt 85 ];
+        then
+        echo "write an error message in syslog or message and send email to <your_email>@amazon.com"
+		fi
+	done
+
+
+
+#---- Reference Solution ----
+  # #!/bin/bash
+  #
+  # EMAIL="your_email@amazon.com"
+  # LOCK_DIR="/tmp/disk_alert"
+  # MOUNT="${1:-/}"  # Bonus: accept mount point as argument, default to /
+  #
+  # mkdir -p "$LOCK_DIR"
+  #
+  # usage=$(df -h "$MOUNT" | awk 'NR==2 {gsub(/%/,""); print $5}')
+  #
+  # if [ "$usage" -ge 85 ]; then
+  #     level="err"
+  #     subject="Disk CRITICAL: ${usage}% on $MOUNT"
+  # elif [ "$usage" -ge 70 ]; then
+  #     level="warning"
+  #     subject="Disk WARNING: ${usage}% on $MOUNT"
+  # else
+  #     exit 0
+  # fi
+  #
+  # # Don't notify again if already sent within the past hour
+  # lock_file="$LOCK_DIR/$(echo "$MOUNT" | tr '/' '_')"
+  # if [ -f "$lock_file" ]; then
+  #     last=$(stat -f %m "$lock_file" 2>/dev/null || stat -c %Y "$lock_file")
+  #     now=$(date +%s)
+  #     if [ $((now - last)) -lt 3600 ]; then
+  #         exit 0
+  #     fi
+  # fi
+  #
+  # logger -p "user.$level" "$subject"
+  # echo "$subject" | mail -s "$subject" "$EMAIL"
+  # touch "$lock_file"
+  #
+  # # Cronjob (add with crontab -e):
+  # # 0 * * * * /path/to/challenge002
+  # ---- End Reference ----

@@ -1,0 +1,19 @@
+#!/bin/bash
+#Challenge 001
+#A simple one; write a bash one-liner to print all unique users in /etc/passwd in a capitalized and sorted list.
+
+#cat /etc/passwd | sort -u | tr '[:lower:]' '[:upper:]'
+
+cut -d: -f1 /etc/passwd | sort -u | tr '[:lower:]' '[:upper:]' | grep -v '^#'
+
+#cut -d: -f1 splits each line on : and grabs the first field (the username). Then sort, deduplicate, and capitalize.
+
+#On macOs it has lines begging with "#" which I don't want.
+#grep -v '^#' /etc/passwd | cut -d: -f1 | sort -u | tr '[:lower:]' '[:upper:]'                                                                               
+                                                                                                                                                              
+#grep -v '^#' excludes any line starting with #
+# grep — searches for lines matching a pattern                                                                                                              
+# - -v — invert the match (show lines that do NOT match)                                                                                                      
+# - '^#' — the pattern, where:                                                                                                                                
+#   - ^ — anchors to the start of the line                                                                                                                    
+#   - # — the literal # character         

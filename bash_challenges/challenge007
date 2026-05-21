@@ -1,0 +1,105 @@
+# Challenge 007                                                                                                         
+                                                                                                                          
+  Login Fun - For any user that logs into a Linux system: display small ascii art of a cat, dog, or cow based on the user 
+   id, report the total number of previous logins that user has had according to the system, the currently                
+   logged in sessions, the current system utilization as displayed in the 'top' command header. This should work for bash 
+   or zsh. Explain how you would accomplish this.                                                                         
+                                                                                                                          
+                                                                                                                          
+                        \`*-.                                                                                             
+                         )  _`-.                                                                                          
+                        .  : `. .                                                                                         
+                        : _   '  \                                                                                        
+                        ; *` _.   `*-._                                                                                   
+                        `-.-'          `-.                                                                                
+                          ;       `       `.                                                                              
+                          :.       .        \                                                                             
+                          . \  .   :   .-'   .                                                                            
+                          '  `+.;  ;  '      :                                                                            
+                          :  '  |    ;       ;-.                                                                          
+                          ; '   : :`-:     _.`* ;                                                                         
+                 [bug] .*' /  .*' ; .*`- +'  `*'                                                                          
+                       `*-*   `*-*  `*-*'                                                                                 
+   
+  Challenge 007: Login Fun
+  
+  Approach
+  
+  Place a script in /etc/profile.d/ — both bash and zsh source files from this directory on interactive login. The script:
+  
+  1. Picks cat/dog/cow based on $UID % 3
+  2. Shows previous login count via last
+  3. Shows current sessions via who
+  4. Shows system utilization via top -bn1 | head -5
+  
+  Implementation
+  
+  #!/bin/bash
+  # /etc/profile.d/login-fun.sh
+  
+  # ASCII art selection based on user ID
+  case $(( UID % 3 )) in
+    0)
+      cat << 'EOF'
+    /\_/\  
+   ( o.o ) 
+    > ^ <
+   /|   |\
+  (_|   |_)
+  EOF
+      ;;
+    1)
+      cat << 'EOF'
+    / \__
+   (    @\___
+    /         O
+   /   (_____/
+  /_____/   U
+  EOF
+      ;;
+    2)
+      cat << 'EOF'
+   ^__^
+   (oo)\_______
+   (__)\       )\/\
+       ||----w |
+       ||     ||
+  EOF
+      ;;
+  esac
+  
+  # Previous login count
+  LOGIN_COUNT=$(last "$USER" | grep -c "^$USER")
+  echo "Previous logins for $USER: $LOGIN_COUNT"
+  echo
+  
+  # Currently logged in sessions
+  echo "Current sessions:"
+  who
+  echo
+  
+  # System utilization (top header)
+  echo "System utilization:"
+  top -bn1 | head -5
+  
+  Setup
+  
+  sudo install -m 0644 login-fun.sh /etc/profile.d/login-fun.sh
+  
+  How it works
+  
+  - /etc/profile.d/ — Scripts here are sourced by /etc/profile on login shells. Bash sources /etc/profile for login shells. Zsh sources it too (when invoked as sh,
+  or via /etc/zsh/zprofile on most distros which explicitly sources /etc/profile or iterates /etc/profile.d/).
+  - UID % 3 — Deterministic per-user selection. UID 0 (root) always gets cat, UID 1000 (typical first user) gets cat, 1001 gets dog, 1002 gets cow, etc.
+  - last "$USER" — Queries /var/log/wtmp for historical login records. grep -c counts the lines.
+  - who — Shows all currently logged-in sessions (user, terminal, login time).
+  - top -bn1 | head -5 — Batch mode, 1 iteration, first 5 lines give uptime, tasks, CPU%, and memory.
+  
+  Zsh note
+  
+  If the target distro's zsh doesn't source /etc/profile.d/ automatically, add a symlink or source line in /etc/zsh/zprofile:
+  
+  # /etc/zsh/zprofile (if not already sourcing profile.d)
+  for f in /etc/profile.d/*.sh; do [ -r "$f" ] && . "$f"; done
+  
+  Most mainstream distros (Ubuntu, Fedora, Arch) already handle this.

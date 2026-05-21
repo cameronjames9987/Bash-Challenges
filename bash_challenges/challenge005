@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Challenge 005
+# A knowledge test; The network 134.122.0.0/16 has been subdivided into /19 networks.
+
+# a) How many networks are there? List them. What is their netmask?
+
+# b) How many hosts could there be on each network?
+
+# c) Determine which network the address 134.122.67.124 belongs to.
+
+# d) What is the broadcast address for each network?
+
+
+134.122.0.0/16
+
+132.122.0.0/19
+132.122.
+
+# /16 → /19 means borrowing 3 extra bits (19 - 16 = 3), giving 2³ = 8 networks.  
+# 256/8 = 32 
+132.122.0.0/19
+132.122.32.0/19
+132.122.64.0/19
+132.122.96.0/19
+132.122.128.0/19
+132.122.160.0/19
+132.122.0.0/19
+

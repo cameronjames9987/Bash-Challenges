@@ -1,0 +1,4 @@
+#!/bin/bash
+
+#Challenge 004
+#One of the local admins did an Edward Scissorhands maneuver and deleted the commands /usr/bin/df and /usr/bin/du on an Amazon Linux instance. Replicate the function of these commands with a bash script and commands found in the util-linux package. Now, ensure your script functions on Amazon Linux 1, CentOS, and Ubuntu as well.

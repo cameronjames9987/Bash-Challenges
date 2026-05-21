@@ -1,0 +1,59 @@
+#!/bin/bash
+
+#Challenge 006
+#Useless Log Generator
+
+#Tired of waiting for logs to be generated so you can look at them? Here's your chance! Implement a Bash script that generates random log messages. The format should be date, time, INFO or ERROR, followed by a message. INFO and ERROR appear randomly. Unlike regular loggers, this one would be printing everything to the console and stop after 10 lines of entries.
+
+#Extra challenge, the message has to have actual words. They can be taken from anywhere in the system and should not be listed in your script. Also, INFO lines would be printed to STDOUT and ERROR lines to STDERR.
+
+#example log lines below -
+
+#2018/02/13 10:03:01 INFO random words come in here
+#2018/02/13 10:03:02 ERROR words random in here come
+#2018/02/13 10:03:03 INFO here words in random come
+
+#shuf -n 5 /usr/share/dict/words
+
+# The -p format is facility.level. Common levels for scripts:
+
+#  ┌────────────────┬────────────────────┐
+#  │ Level          │ When to use        │
+#  ├────────────────┼────────────────────┤
+#  │ `user.err`     │ Errors             │
+#  │ `user.warning` │ Warnings           │
+#  │ `user.notice`  │ Normal but notable │
+#  │ `user.info`    │ Informational      │
+#  └────────────────┴────────────────────┘
+
+#Pipe through tr to replace newlines with spaces: 
+#logger -s -p user.warning "Disk Issue"
+
+
+
+
+#  - $RANDOM — bash built-in that returns a random integer between 0 and 32767
+#  - % 2 — modulo 2, so the result is either 0 or 1
+#  - $(( )) — arithmetic expansion
+#
+#  So level=$((RANDOM % 2)) assigns either 0 or 1 randomly, which is then used to pick between INFO and ERROR.
+
+# >&2 redirects that echo's stdout to stderr. So you can test it with: 
+#  ./challenge006 > /dev/null   # hides INFO, shows ERROR
+#  ./challenge006 2> /dev/null  # hides ERROR, shows INFO
+
+
+for i in {1..10};
+do
+level=$((RANDOM % 2))
+
+if [ $level -eq 1 ]
+then
+	Log_Level='INFO';
+	echo "$(date '+%Y/%m/%d %H:%M:%S') $Log_Level $(shuf -n 5 /usr/share/dict/words | tr '\n' ' ')"
+else
+	Log_Level='ERROR';
+	echo "$(date '+%Y/%m/%d %H:%M:%S') $Log_Level $(shuf -n 5 /usr/share/dict/words | tr '\n' ' ')" >&2
+fi
+done
+#echo "$(date '+%Y/%m/%d %H:%M:%S') $Log_Level $(shuf -n 5 /usr/share/dict/words | tr '\n' ' ')"

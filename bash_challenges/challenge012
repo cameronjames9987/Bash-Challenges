@@ -1,0 +1,57 @@
+#!/bin/bash
+
+#Given a 100MB file named "entries.dat" containing lines like the following list, give a script(Python, Bash or other) or command pipeline to remove the duplicate entries (like where "Charles=100" below), and sort it numerically by the  value after the equals sign and write the results to the file, "entries_sorted.dat".
+ 
+#Now, make it 5 seconds faster
+#```
+#Charles=100
+#Alice=70
+#Bob=40
+#Charles=100
+#Ted=50
+#Susan=100
+#Etc.
+#```
+
+sort -u -t'=' -k2 -n entries.dat > entries_sorted.dat
+
+
+#1. -t'=' — splits each line at =:
+#    - Field 1: Charles, Field 2: 100
+#    - Field 1: Alice, Field 2: 50
+#    - etc.
+
+#  2. -k2 — "sort by field 2" — so it sorts by 100, 50, 75, 25
+#  3. -n — treat those values as numbers, not text. Without this, 100 would come before 25 (because 1 < 2 alphabetically)
+#  4. -u — after sorting, drop any identical lines (removes the duplicate Charles=100)
+#  5. > entries_sorted.dat — write the result to a new file instead of printing to terminal
+
+# sort -u -t'=' -k2 -n entries.dat > entries_sorted.dat
+#  │     │   │     │   │  │             │
+#  │     │   │     │   │  │             └─ redirect output to this file
+#  │     │   │     │   │  └─ input file
+#  │     │   │     │   └─ numeric sort (2 < 10 < 100, not lexicographic)
+#  │     │   │     └─ sort by field 2 (everything after the '=')
+#  │     │   └─ split each line into fields using '=' as delimiter
+#  │     └─ unique — remove duplicate lines
+#  └─ the sort command
+
+
+
+# This is a trick question. Looking at the data more carefully — there are entries where different names have the same value (Charles=100 and Susan=100). The -u flag with a sort key only keeps one line per unique sort key value, so it would drop Susan=100 since it's a duplicate by the numeric field.
+
+#  If the intent is to remove only truly duplicate lines (same name AND same value), while sorting numerically:
+
+#  awk -F'=' '!seen[$0]++' entries.dat | sort -t'=' -k2 -n > entries_sorted.dat
+
+#  But to make it faster on a 100MB file — use parallel sort:
+
+#  awk -F'=' '!seen[$0]++' entries.dat | sort --parallel=$(nproc) -t'=' -k2 -n > entries_sorted.dat
+
+#  ┌─────────────────────┬─────────────────────────────────────────────────────────────────┐
+#  │ Change              │ Why it's faster                                                 │
+#  ├─────────────────────┼─────────────────────────────────────────────────────────────────┤
+#  │ awk '!seen[$0]++'   │ Deduplicates in a single pass (O(n)), reducing data before sort │
+#  ├─────────────────────┼─────────────────────────────────────────────────────────────────┤
+#  │ --parallel=$(nproc) │ Uses all CPU cores for sorting                                  │
+#  └─────────────────────┴─────────────────────────────────────────────────────────────────┘
