@@ -46,7 +46,6 @@ awk '{s+=$1} END {print s}' data.txt
   done < data.txt
   echo "$sum"
 
-# The gotcha: 071 in bash arithmetic is interpreted as octal (base 8), which equals 57 in decimal. Without the fix, you'd get 522 instead of 536.
 
 # The fix: 10#$num forces bash to treat every number as base 10, so 071 = 71.
 #Or:
