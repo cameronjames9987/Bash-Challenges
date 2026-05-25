@@ -1,0 +1,44 @@
+#!/bin/bash
+#Challenge 008
+#Write a bash script that finds all the socket files on your system and counts them.
+#(Hint: the output will be one line per file, so try counting lines). Remember that passing the standard output of one command to the standard input of the next command is done with the | character, often called "pipe."
+
+#Modify the script to ignore symbolic links and to take an argument for what file type to search for.
+#Options should include regular files, directories, character devices, block devices, and sockets.
+
+#Modify the script to use the "logger" command to write output to syslog rather than to the terminal.
+#On your devdesktop this will go to the user.log file. What directory is this file in?
+
+#Run the following one-liner and explain how it works.
+
+#echo "this many files in homedir: $(ls -1 $(cd ~$(whoami)) | wc -l)"
+
+
+#Network sockers ss
+#-----NOTES-----
+#List all sockets: ss -a
+#List listening sockets only: ss -l
+#List TCP sockets: ss -tList UDP sockets: ss -uL
+#ist Unix domain sockets: ss -x
+#Common combination: ss -tulpn shows all listening TCP/UDP sockets with process names and numeric addresses.
+
+# For file System sockets
+# find / -type s 2>/dev/null | wc -l
+# Find all files in directory starting from / for file type of socket
+# 2>/dev/null - supresses permission denied errors
+# wc| -l word count per line
+
+
+case "$1" in
+regular)	type="f" ;;
+directory)	type="d" ;;
+character)	type="c" ;;
+block)		type="b" ;;
+socket)		type="s" ;;
+*)		echo "Usage: $0 {regular|directory|character|block|socket}"; exit 1 ;;
+esac
+
+
+count=$(find / -not -type l -type "$type" 2>/dev/null | wc -l)
+logger "Found $count $1 files"
+find / -not -type l -type "$type" 2>/dev/null | wc -l

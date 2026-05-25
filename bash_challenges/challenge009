@@ -1,0 +1,54 @@
+#!/bin/bash
+#Provide commands to accomplish the following tasks:
+
+#a) Set the permissions on the file README to read/write for the owner and read for everyone else.
+
+#b) Turn on a file’s setuid bit without changing (or knowing) the current permissions.
+
+#c) List the contents of the current directory, sorting by modification time and listing the most recently modified file last.
+
+#d) Change the group of a file called shared from “user” to “friends”.
+
+#What is a umask? Create a umask that would give no permissions to the group or the world. What is the difference between hard links and symbolic (soft) links? When is it appropriate to use one or the other?
+
+#Yes, this is a writing exercise.
+
+#a) chmod 600 <file_name>
+
+#b) setuid (Set User ID) is a special permission bit on executable files. When set, the process runs with the file owner's privileges instead of the executing user's. The classic example: /usr/bin/passwd is owned by root with setuid set, so any user can run it and it can write to /etc/shadow.
+# chmod u+s <file_name>
+#or chmod 4755 <filename>
+
+#c) ls -tr
+#-t sorts by time
+#-r is reverse order
+#-S is file size
+
+#d) chgrp friends shared
+#or chown :friends shared
+
+#umask removes permissions from newly created files and directoies.It defines which permissions are not granted by default.
+
+# file permissions = 666 - umask
+# dir permissions  = 777 - umask
+  
+#Example
+  
+#  umask 077
+  
+#  - Owner gets full (7 - 0 = 7)
+#  - Group gets nothing (7 - 7 = 0)
+#  - World gets nothing (7 - 7 = 0)
+  
+#  New files → 600, new directories → 700.
+#  Running umask 077 applies to:
+  
+#  - The current shell and any child processes it spawns
+#  - All new files/directories created in that session, regardless of location
+  
+#  It does not: 
+#  - Affect other users or other terminal sessions
+#  - Persist after you close the terminal
+#  - Change permissions on existing files
+
+

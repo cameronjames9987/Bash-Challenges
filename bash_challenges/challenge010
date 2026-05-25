@@ -1,0 +1,48 @@
+#!/usr/bin/python3
+
+#Write an AWS lambda function using one of the following languages - c#, go, java, node.js or python
+
+#For the function, pass 2 numbers into the function and have it return the sum, product, difference and quotient of the two numbers.
+
+#May the force be with you!
+
+def values():
+	while True:
+		try:
+			value1 = input("Enter Value A: ")
+			value1 = int(value1)
+		
+			value2 = input("Enter Value B: ")
+			value2 = int(value2)
+		
+			if value1 >= 0 and value2 >=0:
+				return value1, value2 
+		except ValueError: 
+			print ("Please enter a value integer")
+
+
+
+
+
+
+value1, value2 = values()
+print(f"The Sum of these two values is {value1 + value2}")
+print(f"The Product of these two values is {value1 * value2}")
+print(f"The Difference of values A and B is {value1 - value2}")
+print(f"The Quotient of value A and B is {value1 / value2}")
+
+
+
+#def main():
+
+#AI Response:
+#  def lambda_handler(event, context):
+#      a = event['num1']
+#      b = event['num2']
+#      return {
+#          'sum': a + b,
+#          'product': a * b,
+#          'difference': a - b,
+#          'quotient': a / b if b != 0 else None
+#      }
+
